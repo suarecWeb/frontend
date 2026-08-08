@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import EventsService from "@/services/EventsService";
 import { Evento } from "@/interfaces/event.interface";
 import {
@@ -467,7 +467,9 @@ const DetalleModal = ({
 // ── Componente principal ──────────────────────────────────────────────────────
 
 const VentasManagement = () => {
-  const [transacciones, setTransacciones] = useState<TransaccionBoleta[]>([]);
+  const [transaccionesAll, setTransaccionesAll] = useState<TransaccionBoleta[]>(
+    [],
+  );
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -480,8 +482,6 @@ const VentasManagement = () => {
   >("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [total, setTotal] = useState(0);
-  const [totalPaginas, setTotalPaginas] = useState(1);
   const [selectedTxId, setSelectedTxId] = useState<number | null>(null);
 
   // Lista de eventos para el filtro (se carga una sola vez)
@@ -491,44 +491,70 @@ const VentasManagement = () => {
       .catch(() => {});
   }, []);
 
-  // Transacciones paginadas desde el backend: la búsqueda y los filtros de
-  // estado, evento y ambiente se aplican en la consulta, no en memoria
+  // El backend no soporta búsqueda ni filtros por estado/evento/ambiente ni
+  // paginación en este listado: trae todas las transacciones una sola vez
+  // (al montar o al pulsar "Actualizar") y todo lo demás se aplica en memoria
   const cargarTransacciones = useCallback(() => {
     setLoading(true);
-    EventsService.getTransaccionesPaginadas(currentPage, itemsPerPage, {
-      search: searchTerm || undefined,
-      estado: statusFilter === "all" ? undefined : statusFilter,
-      eventoId: eventoFilter === "all" ? undefined : eventoFilter,
-      environment: ambienteFilter === "all" ? undefined : ambienteFilter,
-    })
-      .then((res) => {
-        setTransacciones(res.data.transacciones);
-        setTotal(res.data.total);
-        setTotalPaginas(res.data.totalPaginas);
-      })
+    EventsService.getAllTransacciones()
+      .then((res) => setTransaccionesAll(res.data.transacciones))
       .catch(() => toast.error("Error al cargar las transacciones"))
       .finally(() => setLoading(false));
-  }, [
-    currentPage,
-    itemsPerPage,
-    searchTerm,
-    statusFilter,
-    eventoFilter,
-    ambienteFilter,
-  ]);
+  }, []);
 
-  // Debounce: espera a que el admin deje de escribir antes de consultar
   useEffect(() => {
-    const timeout = setTimeout(cargarTransacciones, 400);
-    return () => clearTimeout(timeout);
+    cargarTransacciones();
   }, [cargarTransacciones]);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, eventoFilter, ambienteFilter]);
 
+  // Búsqueda + filtros de estado, evento y ambiente aplicados en memoria
+  // sobre el listado ya cargado, sin volver a consultar el backend
+  const transaccionesFiltradas = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return transaccionesAll.filter((tx) => {
+      if (statusFilter !== "all" && tx.estadoPago !== statusFilter)
+        return false;
+      if (eventoFilter !== "all" && tx.eventoId !== eventoFilter) return false;
+      if (
+        ambienteFilter !== "all" &&
+        (tx.wompiEnvironment ?? "production") !== ambienteFilter
+      )
+        return false;
+      if (term) {
+        const haystack = [
+          tx.referencia,
+          tx.comprador?.name,
+          tx.comprador?.email,
+          tx.evento?.nombre,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
+      return true;
+    });
+  }, [
+    transaccionesAll,
+    searchTerm,
+    statusFilter,
+    eventoFilter,
+    ambienteFilter,
+  ]);
+
+  const total = transaccionesFiltradas.length;
+  const totalPaginas = Math.max(1, Math.ceil(total / itemsPerPage));
+  const safePage = Math.min(currentPage, totalPaginas);
+  const transacciones = transaccionesFiltradas.slice(
+    (safePage - 1) * itemsPerPage,
+    safePage * itemsPerPage,
+  );
+
   const handleSincronizado = (estadoFinal: string) => {
-    setTransacciones((prev) =>
+    setTransaccionesAll((prev) =>
       prev.map((tx) =>
         tx.id === selectedTxId
           ? { ...tx, estadoPago: estadoFinal as TransaccionEstado }
@@ -536,8 +562,6 @@ const VentasManagement = () => {
       ),
     );
   };
-
-  const safePage = Math.min(currentPage, totalPaginas);
 
   const getPageButtons = () => {
     const pageItems: { type: "page" | "ellipsis"; value: number | string }[] =
