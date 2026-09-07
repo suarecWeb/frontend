@@ -34,6 +34,8 @@ export interface Evento {
   fechaEvento: string;
   ubicacion: string;
   imagenUrl?: string;
+  plantillaTicketUrl?: string | null;
+  logoPatrocinadoresUrl?: string | null;
   aforoTotal?: number;
   aforoDisponible?: number;
   precioBase?: number;
@@ -69,4 +71,6 @@ export interface CreateEventoDto {
   modalidad?: EventoModalidad;
   formatId?: number;
   removeImage?: boolean;
+  removePlantillaTicket?: boolean;
+  removeLogoPatrocinadores?: boolean;
 }

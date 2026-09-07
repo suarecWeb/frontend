@@ -72,6 +72,8 @@ const EventsService = {
     id: string,
     dto: Partial<CreateEventoDto>,
     imageFile?: File,
+    ticketTemplateFile?: File,
+    logoPatrocinadoresFile?: File,
   ): Promise<{ data: Evento }> => {
     const form = new FormData();
     Object.entries(dto).forEach(([key, value]) => {
@@ -81,6 +83,9 @@ const EventsService = {
     });
 
     if (imageFile) form.append("image", imageFile);
+    if (ticketTemplateFile) form.append("ticketTemplate", ticketTemplateFile);
+    if (logoPatrocinadoresFile)
+      form.append("logoPatrocinadores", logoPatrocinadoresFile);
     return api.patch(`${BASE}/${id}`, form, {
       headers: { "Content-Type": "multipart/form-data" },
     });

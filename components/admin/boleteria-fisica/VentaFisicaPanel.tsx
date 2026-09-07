@@ -761,6 +761,8 @@ export const VentaFisicaPanel = ({ evento, onBack }: VentaFisicaPanelProps) => {
             hora: horaEvento,
             lugar: ubicacion,
             descripcion: evento?.descripcion,
+            plantillaTicketUrl: evento?.plantillaTicketUrl,
+            logoPatrocinadoresUrl: evento?.logoPatrocinadoresUrl,
           }}
         />
       </motion.div>

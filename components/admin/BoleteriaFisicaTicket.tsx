@@ -22,6 +22,8 @@ interface EventoInfo {
   hora?: string;
   lugar?: string;
   descripcion?: string;
+  plantillaTicketUrl?: string | null;
+  logoPatrocinadoresUrl?: string | null;
 }
 
 interface BoleteriaFisicaTicketProps {
@@ -36,7 +38,72 @@ interface BoleteriaFisicaTicketProps {
   esPreview?: boolean;
 }
 
-const AGENT_URL = "http://localhost:3001";
+// El agente de impresión abre el primer puerto libre a partir del 3001 en
+// cada máquina; el frontend lo descubre preguntando /health en ese rango.
+// La URL configurada manualmente en Configuración (localStorage) tiene prioridad.
+const AGENT_PORT_START = 3001;
+const AGENT_PORT_ATTEMPTS = 10;
+const AGENT_CONFIG_KEY = "suarec-boleteria-fisica-config";
+
+let discoveredAgentUrl: string | null = null;
+
+// Ancho del rollo térmico configurado en Configuración de boletería física
+// (localStorage). Por defecto 80mm si no hay config guardada.
+function getConfiguredPaperWidthMm(): number {
+  try {
+    const raw = localStorage.getItem(AGENT_CONFIG_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    const width = parsed?.paperWidth;
+    return typeof width === "number" && width > 0 ? width : 80;
+  } catch {
+    return 80;
+  }
+}
+
+async function probePrintAgent(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${url}/health`, {
+      signal: AbortSignal.timeout(2000),
+    });
+    const data = await response.json();
+    return data?.status === "ok" && data?.service === "suarec-print-agent";
+  } catch {
+    return false;
+  }
+}
+
+async function resolvePrintAgentUrl(): Promise<string> {
+  if (discoveredAgentUrl && (await probePrintAgent(discoveredAgentUrl))) {
+    return discoveredAgentUrl;
+  }
+
+  try {
+    const saved = localStorage.getItem(AGENT_CONFIG_KEY);
+    const savedUrl = saved ? JSON.parse(saved)?.agentUrl : null;
+    if (savedUrl && (await probePrintAgent(savedUrl))) {
+      discoveredAgentUrl = savedUrl;
+      return savedUrl;
+    }
+  } catch {
+    // Config inválida en localStorage: se sigue con el escaneo de puertos.
+  }
+
+  const probes = await Promise.all(
+    Array.from({ length: AGENT_PORT_ATTEMPTS }, (_, i) => {
+      const url = `http://localhost:${AGENT_PORT_START + i}`;
+      return probePrintAgent(url).then((ok) => (ok ? url : null));
+    }),
+  );
+  const found = probes.find((url): url is string => Boolean(url));
+  if (found) {
+    discoveredAgentUrl = found;
+    return found;
+  }
+
+  throw new Error(
+    `No se encontró el agente de impresión (puertos ${AGENT_PORT_START}-${AGENT_PORT_START + AGENT_PORT_ATTEMPTS - 1}). Verifica que esté corriendo en esta máquina.`,
+  );
+}
 
 function generarQrSecuencial(baseQr: string, index: number): string {
   const match = baseQr.match(/^(.*?)(\d+)$/);
@@ -146,14 +213,15 @@ export const BoleteriaFisicaTicket = forwardRef<
         return;
       }
 
+      const paperWidthMm = getConfiguredPaperWidthMm();
       printWindow.document.write(`
         <html>
           <head>
             <title>Ticket SUAREC</title>
             <style>
-              @page { size: 80mm auto; margin: 0; }
+              @page { size: ${paperWidthMm}mm auto; margin: 0; }
               body { margin: 0; padding: 0; background: white; }
-              img { width: 80mm; height: auto; display: block; }
+              img { width: ${paperWidthMm}mm; height: auto; display: block; }
             </style>
           </head>
           <body>
@@ -189,12 +257,21 @@ export const BoleteriaFisicaTicket = forwardRef<
       // `<img src="${imagesBase64[0]}" style="max-width:100%" />`,
       // );
 
+      setAgentStatus("Buscando agente de impresión local...");
+
+      const agentUrl = await resolvePrintAgentUrl();
+
       setAgentStatus("Enviando imagen al agente de impresión...");
 
-      const response = await fetch(`${AGENT_URL}/print-image`, {
+      // paperWidthMm se envía al agente local por si su versión lo soporta;
+      // si el agente no lee este campo, lo ignora sin romper la impresión.
+      const response = await fetch(`${agentUrl}/print-image`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageBase64: imagesBase64 }),
+        body: JSON.stringify({
+          imageBase64: imagesBase64,
+          paperWidthMm: getConfiguredPaperWidthMm(),
+        }),
       });
 
       const data = await response.json();
@@ -207,9 +284,7 @@ export const BoleteriaFisicaTicket = forwardRef<
         `${printQrValues.length} ticket(s) enviado(s) a la impresora ${data.printer}`,
       );
     } catch (error: any) {
-      setAgentStatus(
-        `Error: ${error.message}. Verifica que el agente local esté corriendo en ${AGENT_URL}`,
-      );
+      setAgentStatus(`Error: ${error.message}`);
     }
   }, [hasRealQr, printQrValues.length, captureSingleTickets]);
 
@@ -221,6 +296,7 @@ export const BoleteriaFisicaTicket = forwardRef<
   const previewScale = 0.7;
   const previewWidth = Math.round(400 * previewScale);
   const previewHeight = Math.round(926 * previewScale);
+  const paperWidthMm = getConfiguredPaperWidthMm();
 
   return (
     <div className="relative flex flex-col items-center gap-6">
@@ -300,11 +376,11 @@ export const BoleteriaFisicaTicket = forwardRef<
         </p>
       )}
 
-      {/* Estilos de impresión térmica 80mm */}
+      {/* Estilos de impresión térmica -- ancho tomado de Configuración */}
       <style>{`
         @media print {
           @page {
-            size: 80mm auto;
+            size: ${paperWidthMm}mm auto;
             margin: 0;
           }
 
@@ -332,7 +408,7 @@ export const BoleteriaFisicaTicket = forwardRef<
 
           .ticket-print {
             position: relative !important;
-            width: 80mm !important;
+            width: ${paperWidthMm}mm !important;
             height: auto !important;
             aspect-ratio: 400 / 926 !important;
             margin: 0 !important;
