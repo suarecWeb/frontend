@@ -8,6 +8,7 @@ import EventosFisicosManagement from "@/components/admin/boleteria-fisica/Evento
 import VentasFisicasManagement from "@/components/admin/boleteria-fisica/VentasFisicasManagement";
 import EstadisticasFisicasManagement from "@/components/admin/boleteria-fisica/EstadisticasFisicasManagement";
 import LotesFisicosManagement from "@/components/admin/boleteria-fisica/LotesFisicosManagement";
+import ConfiguracionFisicaManagement from "@/components/admin/boleteria-fisica/ConfiguracionFisicaManagement";
 import {
   CalendarDays,
   Ticket,
@@ -46,11 +47,9 @@ const TAB_CONFIG: Record<
     label: "Estadísticas",
     icon: <BarChart3 className="h-4 w-4" />,
   },
-  // Deshabilitada: la pantalla de configuración no tiene funcionalidad real aún
   config: {
     label: "Configuración",
     icon: <Settings className="h-4 w-4" />,
-    disabled: true,
   },
 };
 
@@ -152,6 +151,8 @@ const BoleteriaFisicaPageContent = () => {
                 {activeTab === "estadisticas" && (
                   <EstadisticasFisicasManagement />
                 )}
+
+                {activeTab === "config" && <ConfiguracionFisicaManagement />}
               </motion.div>
             </AnimatePresence>
           </div>

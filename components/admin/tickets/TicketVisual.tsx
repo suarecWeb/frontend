@@ -9,6 +9,8 @@ interface EventoInfo {
   hora?: string;
   lugar?: string;
   descripcion?: string;
+  plantillaTicketUrl?: string | null;
+  logoPatrocinadoresUrl?: string | null;
 }
 
 export interface TicketVisualProps {
@@ -46,6 +48,10 @@ export const TicketVisual = ({
   esPreview = false,
   printOffset = false,
 }: TicketVisualProps) => {
+  // Clase compartida entre "Valor pagado" y "Fecha de compra" -- misma
+  // altura y tamaño para los dos en vez de repetir el bloque completo.
+  const footerBoxClass = `bottom-[calc(5.5%-1px)] text-center w-[30%] h-[60px] px-1.5 py-1 bg-white flex flex-col items-center justify-center ${printOffset ? "translate-x-6" : ""}`;
+
   return (
     <div
       className={`ticket-print relative w-[400px] h-[926px] shrink-0 overflow-hidden bg-white ${className}`}
@@ -53,7 +59,7 @@ export const TicketVisual = ({
       {/* Imagen base del ticket */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/tickets/base.png"
+        src={evento?.plantillaTicketUrl || "/tickets/base.png"}
         alt="Ticket boletería física"
         className="absolute p-5 inset-0 w-[400px] h-[900px] object-contain"
       />
@@ -68,7 +74,7 @@ export const TicketVisual = ({
         <div
           className={`absolute top-[35px] right-[8%] bg-white px-2 py-1 ${printOffset ? "translate-x-8" : ""}`}
         >
-          <span className="text-[18px] font-black text-black tracking-tight">
+          <span className="text-[23px] font-black text-black tracking-tight">
             {tipoBoleta}
           </span>
         </div>
@@ -82,11 +88,27 @@ export const TicketVisual = ({
           </p>
         </div>
 
+        {/* Logo de patrocinadores -- espacio en blanco medido en la
+            plantilla base (14%-30% alto, 10%-90% ancho), debajo del
+            texto "Patrocinan" y arriba de la línea punteada. */}
+        {evento?.logoPatrocinadoresUrl && (
+          <div
+            className={`absolute left-[10%] top-[14%] right-[10%] h-[16%] flex items-center justify-center ${printOffset ? "translate-x-8" : ""}`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={evento.logoPatrocinadoresUrl}
+              alt="Patrocinadores"
+              className="max-w-full max-h-full object-contain"
+            />
+          </div>
+        )}
+
         {/* Se presentan */}
         {evento?.descripcion && (
           <>
             <div
-              className={`absolute left-[10%] top-[30.999%] right-[10%] text-center bg-white px-1 py-1 rounded h-[20px] ${printOffset ? "translate-x-8" : ""}`}
+              className={`absolute left-[10%] top-[32%] right-[10%] text-center bg-white px-1 py-1 rounded h-[20px] ${printOffset ? "translate-x-8" : ""}`}
             >
               <p className="text-[13px] uppercase tracking-wide text-gray-600 font-extrabold">
                 Se presentan
@@ -178,25 +200,21 @@ export const TicketVisual = ({
         <div className="absolute left-0 right-0 top-[83.5%] text-center px-4"></div>
 
         {/* Valor pagado */}
-        <div
-          className={`absolute left-[6%] bottom-[calc(7%-6px)] text-center w-[40%] px-1.5 py-2 ${printOffset ? "translate-x-8" : ""}`}
-        >
+        <div className={`absolute left-[10%] ${footerBoxClass}`}>
           <p className="text-[10px] uppercase tracking-wide text-gray-800 font-extrabold leading-tight">
             Valor pagado
           </p>
-          <p className="text-[17px] font-black text-black leading-tight tracking-tight">
+          <p className="text-[15px] font-black text-black leading-tight tracking-tight">
             {formatCOP(precio)}
           </p>
         </div>
 
         {/* Fecha de compra */}
-        <div
-          className={`absolute right-[6%] bottom-[calc(7%-6px)] text-center w-[40%] px-1.5 py-2 ${printOffset ? "translate-x-8" : ""}`}
-        >
+        <div className={`absolute right-[10%] ${footerBoxClass}`}>
           <p className="text-[10px] uppercase tracking-wide text-gray-800 font-extrabold leading-tight">
             Fecha de compra
           </p>
-          <p className="text-[17px] font-black text-black leading-tight tracking-tight">
+          <p className="text-[15px] font-black text-black leading-tight tracking-tight">
             {fechaCompra}
           </p>
         </div>
