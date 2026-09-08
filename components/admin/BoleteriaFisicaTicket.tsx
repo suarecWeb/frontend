@@ -30,7 +30,7 @@ interface BoleteriaFisicaTicketProps {
   qrValue: string;
   qrValues?: string[];
   qrIds?: string[];
-  tipoBoleta?: "GENERAL" | "VIP";
+  tipoBoleta?: "GENERAL" | "VIP" | "PALCO_INDIVIDUAL";
   precio: string;
   fechaCompra: string;
   evento?: EventoInfo;

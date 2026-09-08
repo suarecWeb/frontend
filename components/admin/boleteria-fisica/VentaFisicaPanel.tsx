@@ -89,7 +89,9 @@ const parsePriceInput = (raw: string): number | undefined => {
 
 export const VentaFisicaPanel = ({ evento, onBack }: VentaFisicaPanelProps) => {
   const [qrValue, setQrValue] = useState("SUAREC-EVT-001-TKT-0001");
-  const [tipoBoleta, setTipoBoleta] = useState<"GENERAL" | "VIP">("GENERAL");
+  const [tipoBoleta, setTipoBoleta] = useState<
+    "GENERAL" | "VIP" | "PALCO_INDIVIDUAL"
+  >("GENERAL");
   const [fechaEvento, setFechaEvento] = useState(
     "Domingo, 19 de julio de 2026",
   );
@@ -252,6 +254,7 @@ export const VentaFisicaPanel = ({ evento, onBack }: VentaFisicaPanelProps) => {
           metodoPago === MetodoPagoFisico.EFECTIVO
             ? billeteRecibidoNum || undefined
             : undefined,
+        tipoBoleta,
       });
 
       // eslint-disable-next-line no-console
@@ -476,12 +479,15 @@ export const VentaFisicaPanel = ({ evento, onBack }: VentaFisicaPanelProps) => {
               <select
                 value={tipoBoleta}
                 onChange={(e) =>
-                  setTipoBoleta(e.target.value as "GENERAL" | "VIP")
+                  setTipoBoleta(
+                    e.target.value as "GENERAL" | "VIP" | "PALCO_INDIVIDUAL",
+                  )
                 }
                 className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#097EEC] text-sm bg-white"
               >
                 <option value="GENERAL">GENERAL</option>
                 <option value="VIP">VIP</option>
+                <option value="PALCO_INDIVIDUAL">PALCO INDIVIDUAL</option>
               </select>
             </div>
 

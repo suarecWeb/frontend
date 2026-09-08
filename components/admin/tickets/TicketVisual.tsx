@@ -16,7 +16,7 @@ interface EventoInfo {
 export interface TicketVisualProps {
   qrValue: string;
   qrId?: string;
-  tipoBoleta?: "GENERAL" | "VIP";
+  tipoBoleta?: "GENERAL" | "VIP" | "PALCO_INDIVIDUAL";
   precio: string;
   fechaCompra: string;
   evento?: EventoInfo;
@@ -70,12 +70,15 @@ export const TicketVisual = ({
       <div
         className={`absolute inset-0 ${printOffset ? "-translate-x-8" : ""}`}
       >
-        {/* Tipo de boleta */}
+        {/* Tipo de boleta -- "PALCO_INDIVIDUAL" es más largo que
+            GENERAL/VIP, por eso baja de tamaño solo para ese caso. */}
         <div
           className={`absolute top-[35px] right-[8%] bg-white px-2 py-1 ${printOffset ? "translate-x-8" : ""}`}
         >
-          <span className="text-[23px] font-black text-black tracking-tight">
-            {tipoBoleta}
+          <span
+            className={`font-black text-black tracking-tight ${tipoBoleta === "PALCO_INDIVIDUAL" ? "text-[20px]" : "text-[23px]"}`}
+          >
+            {tipoBoleta.replace(/_/g, " ")}
           </span>
         </div>
 
