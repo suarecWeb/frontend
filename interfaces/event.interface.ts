@@ -10,6 +10,7 @@ export enum EventoTipo {
   GENERAL = "GENERAL",
   VIP = "VIP",
   PALCO = "PALCO",
+  PALCO_INDIVIDUAL = "PALCO_INDIVIDUAL",
 }
 
 // Modalidad del evento — canal exclusivo: digital (online) o físico (taquilla)

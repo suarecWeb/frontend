@@ -16,6 +16,7 @@ export interface VenderBoletasFisicasDto {
   cantidad: number;
   metodoPago: MetodoPagoFisico;
   billeteRecibido?: number;
+  tipoBoleta?: "GENERAL" | "VIP" | "PALCO" | "PALCO_INDIVIDUAL";
 }
 
 export interface VenderBoletasFisicasResponse {
@@ -41,6 +42,7 @@ export interface BoletaFisicaConQR {
   id: string;
   estado: string;
   qrToken: string;
+  tipo?: "GENERAL" | "VIP" | "PALCO" | "PALCO_INDIVIDUAL" | null;
 }
 
 export interface VentaFisicaConBoletasResponse {

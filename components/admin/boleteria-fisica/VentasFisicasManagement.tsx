@@ -36,6 +36,13 @@ const ESTADO_BOLETA_COLOR: Record<string, string> = {
   usada: "bg-emerald-100 text-emerald-700 border-emerald-200",
 };
 
+const TIPO_BOLETA_COLOR: Record<string, string> = {
+  GENERAL: "bg-gray-100 text-gray-600 border-gray-200",
+  VIP: "bg-amber-100 text-amber-700 border-amber-200",
+  PALCO: "bg-purple-100 text-purple-700 border-purple-200",
+  PALCO_INDIVIDUAL: "bg-purple-100 text-purple-700 border-purple-200",
+};
+
 const formatCOP = (value: number) =>
   new Intl.NumberFormat("es-CO", {
     style: "currency",
@@ -110,6 +117,19 @@ const VentaFisicaDetalleModal = ({
   const ticketRef = useRef<BoleteriaFisicaTicketRef | null>(null);
 
   const boletas = detalle?.boletas ?? null;
+
+  // Tipo real grabado en la primera boleta que se está reimprimiendo (todas
+  // las boletas de una misma venta comparten tipo, asignado atómicamente al
+  // vender). "PALCO" no es seleccionable en venta física, así que no
+  // debería aparecer aquí; se trata igual que sin tipo (boletas anteriores
+  // a este cambio, sin dato -- caen a "GENERAL" como antes).
+  const primerTipo = boletas?.find((b) =>
+    qrsAImprimir.ids.includes(b.id),
+  )?.tipo;
+  const tipoAImprimir: "GENERAL" | "VIP" | "PALCO_INDIVIDUAL" =
+    primerTipo === "VIP" || primerTipo === "PALCO_INDIVIDUAL"
+      ? primerTipo
+      : "GENERAL";
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -252,6 +272,16 @@ const VentaFisicaDetalleModal = ({
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
+                      {b.tipo && (
+                        <span
+                          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
+                            TIPO_BOLETA_COLOR[b.tipo] ??
+                            "bg-gray-100 text-gray-600 border-gray-200"
+                          }`}
+                        >
+                          {b.tipo.replace(/_/g, " ")}
+                        </span>
+                      )}
                       <span
                         className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${
                           ESTADO_BOLETA_COLOR[b.estado] ??
@@ -296,7 +326,7 @@ const VentaFisicaDetalleModal = ({
               qrsAImprimir.values.length > 0 ? qrsAImprimir.values : undefined
             }
             qrIds={qrsAImprimir.ids.length > 0 ? qrsAImprimir.ids : undefined}
-            tipoBoleta={detalle?.eventoTipo === "VIP" ? "VIP" : "GENERAL"}
+            tipoBoleta={tipoAImprimir}
             precio={String(detalle?.precioBase ?? "")}
             fechaCompra={new Date(venta.createdAt).toLocaleDateString("es-CO")}
             cantidad={qrsAImprimir.values.length || venta.cantidad}

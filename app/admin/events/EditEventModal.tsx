@@ -635,14 +635,14 @@ export default function EditEventModal({
             <label className="block text-xs font-medium text-gray-600 mb-1">
               Tipo de evento <span className="text-red-400">*</span>
             </label>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => {
                   setTipoEvento(EventoTipo.GENERAL);
                   setErrors((prev) => ({ ...prev, tipo: undefined }));
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-medium transition-all ${
+                className={`flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-medium transition-all ${
                   tipoEvento === EventoTipo.GENERAL
                     ? "border-[#097EEC] bg-[#097EEC]/5 text-[#097EEC]"
                     : errors.tipo
@@ -659,7 +659,7 @@ export default function EditEventModal({
                   setTipoEvento(EventoTipo.VIP);
                   setErrors((prev) => ({ ...prev, tipo: undefined }));
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-medium transition-all ${
+                className={`flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-medium transition-all ${
                   tipoEvento === EventoTipo.VIP
                     ? "border-[#097EEC] bg-[#097EEC]/5 text-[#097EEC]"
                     : errors.tipo
@@ -676,7 +676,7 @@ export default function EditEventModal({
                   setTipoEvento(EventoTipo.PALCO);
                   setErrors((prev) => ({ ...prev, tipo: undefined }));
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-medium transition-all ${
+                className={`flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-medium transition-all ${
                   tipoEvento === EventoTipo.PALCO
                     ? "border-[#097EEC] bg-[#097EEC]/5 text-[#097EEC]"
                     : errors.tipo
@@ -686,6 +686,23 @@ export default function EditEventModal({
               >
                 <Armchair className="h-4 w-4" />
                 Palco
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoEvento(EventoTipo.PALCO_INDIVIDUAL);
+                  setErrors((prev) => ({ ...prev, tipo: undefined }));
+                }}
+                className={`flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-medium transition-all ${
+                  tipoEvento === EventoTipo.PALCO_INDIVIDUAL
+                    ? "border-[#097EEC] bg-[#097EEC]/5 text-[#097EEC]"
+                    : errors.tipo
+                      ? "border-red-300 text-red-400"
+                      : "border-gray-200 text-gray-400 hover:border-gray-300"
+                }`}
+              >
+                <Armchair className="h-4 w-4" />
+                Palco individual
               </button>
             </div>
             {errors.tipo && (
