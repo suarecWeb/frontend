@@ -8,7 +8,7 @@ import { Evento } from "@/interfaces/event.interface";
 import {
   BoleteriaFisicaTicket,
   type BoleteriaFisicaTicketRef,
-} from "@/components/admin/BoleteriaFisicaTicket";
+} from "@/components/admin/boleteria/fisica/BoleteriaFisicaTicket";
 import EventsService from "@/services/EventsService";
 import { useResizablePanel } from "@/hooks/useResizablePanel";
 import { MetodoPagoFisico } from "@/interfaces/boleteria-fisica.interface";

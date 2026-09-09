@@ -7,8 +7,8 @@ import RoleGuard from "@/components/role-guard";
 import { useResizablePanel } from "@/hooks/useResizablePanel";
 import { Send, History } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import NotificationsSendForm from "@/components/admin/NotificationsSendForm";
-import NotificationsHistory from "@/components/admin/NotificationsHistory";
+import NotificationsSendForm from "@/components/admin/notificaciones/NotificationsSendForm";
+import NotificationsHistory from "@/components/admin/notificaciones/NotificationsHistory";
 
 type NotificationsTab = "enviar" | "historial";
 

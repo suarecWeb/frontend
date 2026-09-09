@@ -4,11 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/navbar";
 import RoleGuard from "@/components/role-guard";
-import EventosFisicosManagement from "@/components/admin/boleteria-fisica/EventosFisicosManagement";
-import VentasFisicasManagement from "@/components/admin/boleteria-fisica/VentasFisicasManagement";
-import EstadisticasFisicasManagement from "@/components/admin/boleteria-fisica/EstadisticasFisicasManagement";
-import LotesFisicosManagement from "@/components/admin/boleteria-fisica/LotesFisicosManagement";
-import ConfiguracionFisicaManagement from "@/components/admin/boleteria-fisica/ConfiguracionFisicaManagement";
+import EventosFisicosManagement from "@/components/admin/boleteria/fisica/EventosFisicosManagement";
+import VentasFisicasManagement from "@/components/admin/boleteria/fisica/VentasFisicasManagement";
+import EstadisticasFisicasManagement from "@/components/admin/boleteria/fisica/EstadisticasFisicasManagement";
+import LotesFisicosManagement from "@/components/admin/boleteria/fisica/LotesFisicosManagement";
+import ConfiguracionFisicaManagement from "@/components/admin/boleteria/fisica/ConfiguracionFisicaManagement";
 import {
   CalendarDays,
   Ticket,

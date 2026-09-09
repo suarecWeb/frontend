@@ -7,8 +7,8 @@ import RoleGuard from "@/components/role-guard";
 import { useResizablePanel } from "@/hooks/useResizablePanel";
 import { ArrowRightLeft, Wallet as WalletIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import WalletsManagement from "@/components/admin/WalletsManagement";
-import MovimientosManagement from "@/components/admin/MovimientosManagement";
+import WalletsManagement from "@/components/admin/wallet/WalletsManagement";
+import MovimientosManagement from "@/components/admin/wallet/MovimientosManagement";
 
 type WalletTab = "movimientos" | "wallets";
 

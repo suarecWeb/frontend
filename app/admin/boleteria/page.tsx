@@ -5,12 +5,13 @@ import Navbar from "@/components/navbar";
 import AdminSidePanel from "@/components/AdminSidePanel";
 import RoleGuard from "@/components/role-guard";
 import { useResizablePanel } from "@/hooks/useResizablePanel";
-import EventsManagement from "@/components/admin/EventsManagement";
+import EventsManagement from "@/components/admin/boleteria/shared/EventsManagement";
+import BannerSlidesManagement from "@/components/admin/boleteria/digital/banners/BannerSlidesManagement";
 import { EventoModalidad } from "@/interfaces/event.interface";
-import VentasManagement from "@/components/admin/VentasManagement";
-import EstadisticasManagement from "@/components/admin/EstadisticasManagement";
-import ConfiguracionManagement from "@/components/admin/ConfiguracionManagement";
-import SoporteQRManagement from "@/components/admin/SoporteQRManagement";
+import VentasManagement from "@/components/admin/boleteria/digital/ventas/VentasManagement";
+import EstadisticasManagement from "@/components/admin/boleteria/digital/estadisticas/EstadisticasManagement";
+import ConfiguracionManagement from "@/components/admin/boleteria/digital/configuracion/ConfiguracionManagement";
+import SoporteQRManagement from "@/components/admin/boleteria/digital/soporte/SoporteQRManagement";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -145,9 +146,15 @@ const BoleteriaPageContent = () => {
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
                   {activeTab === "eventos" && (
-                    <EventsManagement
-                      filtroModalidad={EventoModalidad.DIGITAL}
-                    />
+                    <>
+                      {/* Gestor de banners: hermano ARRIBA de la lista, no
+                          anidado dentro de EventsManagement (ese componente
+                          lo comparten boletería digital y física). */}
+                      <BannerSlidesManagement />
+                      <EventsManagement
+                        filtroModalidad={EventoModalidad.DIGITAL}
+                      />
+                    </>
                   )}
 
                   {activeTab === "ventas" && <VentasManagement />}

@@ -9,7 +9,7 @@ import {
   useImperativeHandle,
 } from "react";
 import html2canvas from "html2canvas";
-import { TicketVisual } from "./tickets/TicketVisual";
+import { TicketVisual } from "./TicketVisual";
 
 export type BoleteriaFisicaTicketRef = {
   handlePrint: () => void;

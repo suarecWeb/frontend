@@ -27,7 +27,7 @@ import {
 import {
   BoleteriaFisicaTicket,
   type BoleteriaFisicaTicketRef,
-} from "@/components/admin/BoleteriaFisicaTicket";
+} from "@/components/admin/boleteria/fisica/BoleteriaFisicaTicket";
 import { formatDisplayDate } from "@/lib/TimeZone";
 
 const ESTADO_BOLETA_COLOR: Record<string, string> = {

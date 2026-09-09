@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import EventsManagement from "@/components/admin/EventsManagement";
+import EventsManagement from "@/components/admin/boleteria/shared/EventsManagement";
 import { EventoModalidad } from "@/interfaces/event.interface";
 import { EVENTOS_FISICOS_MOCK } from "./mocks/eventos-fisicos.mock";
 import { Beaker, Database } from "lucide-react";

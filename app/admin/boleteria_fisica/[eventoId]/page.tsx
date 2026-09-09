@@ -5,9 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/navbar";
 import RoleGuard from "@/components/role-guard";
-import { VentaFisicaPanel } from "@/components/admin/boleteria-fisica/VentaFisicaPanel";
-import { LotesFisicosPanel } from "@/components/admin/boleteria-fisica/LotesFisicosPanel";
-import { EVENTOS_FISICOS_MOCK } from "@/components/admin/boleteria-fisica/mocks/eventos-fisicos.mock";
+import { VentaFisicaPanel } from "@/components/admin/boleteria/fisica/VentaFisicaPanel";
+import { LotesFisicosPanel } from "@/components/admin/boleteria/fisica/LotesFisicosPanel";
+import { EVENTOS_FISICOS_MOCK } from "@/components/admin/boleteria/fisica/mocks/eventos-fisicos.mock";
 import EventsService from "@/services/EventsService";
 import { Evento } from "@/interfaces/event.interface";
 import {
