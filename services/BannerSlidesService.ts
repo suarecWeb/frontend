@@ -4,6 +4,7 @@ import {
   CreateBannerSlideDto,
   UpdateBannerSlideDto,
 } from "@/interfaces/banner-slide.interface";
+import { Evento } from "@/interfaces/event.interface";
 
 const BASE = "/suarec/banner-slides";
 
@@ -38,6 +39,11 @@ const BannerSlidesService = {
   /** Todos los slides (activos e inactivos), ordenados por position. */
   getAllAdmin: (): Promise<{ data: BannerSlide[] }> =>
     api.get(`${BASE}/admin/all`),
+
+  /** Eventos enlazables a un slide. El backend excluye los de modalidad física,
+   *  que son exclusivos de taquilla presencial y no se compran en la app. */
+  getEventosEnlazables: (): Promise<{ data: Evento[] }> =>
+    api.get(`${BASE}/admin/eventos-enlazables`),
 
   create: (
     dto: CreateBannerSlideDto,

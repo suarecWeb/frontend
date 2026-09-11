@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { PlusCircle, Images, Loader2 } from "lucide-react";
+import { PlusCircle, Images } from "lucide-react";
 import toast from "react-hot-toast";
 import {
   BannerSlide,
@@ -11,8 +11,8 @@ import {
 } from "@/interfaces/banner-slide.interface";
 import { Evento } from "@/interfaces/event.interface";
 import BannerSlidesService from "@/services/BannerSlidesService";
-import EventsService from "@/services/EventsService";
 import BannerSlideCard from "./BannerSlideCard";
+import BannerSlidesPreview from "./BannerSlidesPreview";
 import BannerSlideFormModal from "./BannerSlideFormModal";
 
 /** Extrae el mensaje que devuelve el backend (ej. "Máximo 5 slides activos").
@@ -49,7 +49,9 @@ const BannerSlidesManagement = () => {
     cargarSlides();
     // Los eventos alimentan el desplegable del formulario. Si fallan, el resto
     // de la pantalla sigue funcionando: solo no se podrán enlazar eventos.
-    EventsService.getAllEventsAdmin()
+    // El endpoint vive en banner-slides, no en events: la regla de qué evento
+    // es enlazable pertenece a este módulo y el backend la aplica, no el panel.
+    BannerSlidesService.getEventosEnlazables()
       .then(({ data }) => setEventos(data))
       .catch(() => toast.error("No se pudieron cargar los eventos"));
   }, [cargarSlides]);
@@ -177,9 +179,37 @@ const BannerSlidesManagement = () => {
         cambiar el orden en que se muestran.
       </p>
 
+      {/* Va ARRIBA de la lista arrastrable a propósito: al reordenar abajo,
+          esta franja se reacomoda en vivo y se ve el resultado sin salir */}
+      {!cargando && <BannerSlidesPreview slides={slides} />}
+
       {cargando ? (
-        <div className="flex justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        // Placeholders con la MISMA silueta que BannerSlideCard: al llegar los
+        // datos el contenido reemplaza al esqueleto sin que salte el layout
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              // gap-4, p-3 y border: las MISMAS medidas que BannerSlideCard,
+              // si no las columnas del esqueleto no caen donde caerán las reales
+              className="flex animate-pulse items-center gap-4 rounded-xl border border-gray-200 bg-white p-3"
+            >
+              <div className="h-5 w-5 shrink-0 rounded bg-gray-100" />
+              <div className="h-16 w-28 shrink-0 rounded-lg bg-gray-100" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="h-4 w-1/3 rounded bg-gray-100" />
+                <div className="flex gap-2">
+                  <div className="h-4 w-16 rounded-full bg-gray-100" />
+                  <div className="h-4 w-14 rounded-full bg-gray-100" />
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
+                <div className="h-9 w-9 rounded-lg bg-gray-100" />
+                <div className="h-9 w-9 rounded-lg bg-gray-100" />
+                <div className="h-9 w-9 rounded-lg bg-gray-100" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : slides.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 py-10 text-center">

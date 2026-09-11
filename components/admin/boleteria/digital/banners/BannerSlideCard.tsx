@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Calendar,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 import {
   BannerSlide,
-  tieneEventoNoDisponible,
+  motivoEventoNoDisponible,
 } from "@/interfaces/banner-slide.interface";
 
 interface BannerSlideCardProps {
@@ -40,7 +41,17 @@ const BannerSlideCard = ({
   isDragging = false,
 }: BannerSlideCardProps) => {
   const esLibre = slide.eventId === null;
-  const eventoNoDisponible = tieneEventoNoDisponible(slide);
+  const motivoNoDisponible = motivoEventoNoDisponible(slide);
+
+  // Las imágenes vienen de Supabase por red: sin esto aparecen de golpe
+  const [imagenCargada, setImagenCargada] = useState(false);
+
+  // Tras actualizar un slide, React reusa esta card porque su key (el id) no
+  // cambió y el estado sobrevive. Sin reiniciarlo, la imagen nueva se pintaría
+  // opaca desde el primer frame y no habría transición
+  useEffect(() => {
+    setImagenCargada(false);
+  }, [slide.imageUrl]);
 
   return (
     <div
@@ -55,12 +66,20 @@ const BannerSlideCard = ({
 
       {/* Miniatura */}
       <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+        {/* El pulso queda DEBAJO de la imagen y se apaga al terminar de cargar */}
+        {!imagenCargada && (
+          <div className="absolute inset-0 animate-pulse bg-gray-200" />
+        )}
         <Image
           src={slide.imageUrl}
           alt={slide.title ?? "Slide del banner"}
           fill
           sizes="112px"
-          className={`object-cover ${!slide.isActive ? "grayscale" : ""}`}
+          onLoad={() => setImagenCargada(true)}
+          onError={() => setImagenCargada(true)}
+          className={`object-cover transition-opacity duration-500 ${
+            imagenCargada ? "opacity-100" : "opacity-0"
+          } ${!slide.isActive ? "grayscale" : ""}`}
         />
       </div>
 
@@ -99,9 +118,9 @@ const BannerSlideCard = ({
 
           {/* Slide de bienvenida: el que se abre solo al entrar a la app */}
           {slide.autoOpen && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
               <Sparkles className="h-3 w-3" />
-              Bienvenida
+              Mostrando al iniciar la app
             </span>
           )}
         </div>
@@ -115,13 +134,13 @@ const BannerSlideCard = ({
 
         {/*
           Aviso clave: el slide figura como activo pero NO se está publicando
-          porque su evento fue ocultado. Sin este cartel el admin vería el
-          carousel encogerse sin poder relacionarlo con su acción.
+          porque su evento dejó de ser válido. Se muestra el motivo concreto:
+          sin él, el admin vería el carousel encogerse sin saber por qué.
         */}
-        {eventoNoDisponible && (
+        {motivoNoDisponible && (
           <p className="mt-1 inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
             <AlertTriangle className="h-3 w-3 shrink-0" />
-            Evento no disponible — este slide no se está publicando
+            {motivoNoDisponible} — este slide no se está publicando
           </p>
         )}
       </div>

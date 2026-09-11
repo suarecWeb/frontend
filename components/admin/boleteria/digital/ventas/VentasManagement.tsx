@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import EventsService from "@/services/EventsService";
-import { Evento } from "@/interfaces/event.interface";
+import { Evento, EventoTipo } from "@/interfaces/event.interface";
 import {
   DetalleTransaccion,
   TransaccionBoleta,
@@ -28,6 +28,28 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Antes era un ternario que solo preguntaba por VIP, asi que PALCO y
+// PALCO_INDIVIDUAL se mostraban como "General". Con Record<EventoTipo> un tipo
+// nuevo no compila hasta que alguien le asigne etiqueta y color
+const TIPO_CONFIG: Record<EventoTipo, { label: string; color: string }> = {
+  [EventoTipo.VIP]: {
+    label: "VIP",
+    color: "bg-amber-100 text-amber-700 border-amber-200",
+  },
+  [EventoTipo.PALCO]: {
+    label: "Palco",
+    color: "bg-purple-100 text-purple-700 border-purple-200",
+  },
+  [EventoTipo.PALCO_INDIVIDUAL]: {
+    label: "Palco individual",
+    color: "bg-indigo-100 text-indigo-700 border-indigo-200",
+  },
+  [EventoTipo.GENERAL]: {
+    label: "General",
+    color: "bg-gray-100 text-gray-600 border-gray-200",
+  },
+};
 
 const ESTADO_CONFIG: Record<
   TransaccionEstado,
@@ -264,15 +286,11 @@ const DetalleModal = ({
                     <span className="truncate max-w-[150px]">
                       {tx?.evento?.nombre ?? "—"}
                     </span>
-                    {tx?.evento?.tipo && (
+                    {tx?.evento?.tipo && TIPO_CONFIG[tx.evento.tipo] && (
                       <span
-                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
-                          tx.evento.tipo === "VIP"
-                            ? "bg-amber-100 text-amber-700 border-amber-200"
-                            : "bg-gray-100 text-gray-600 border-gray-200"
-                        }`}
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${TIPO_CONFIG[tx.evento.tipo].color}`}
                       >
-                        {tx.evento.tipo === "VIP" ? "VIP" : "General"}
+                        {TIPO_CONFIG[tx.evento.tipo].label}
                       </span>
                     )}
                   </span>

@@ -1,4 +1,4 @@
-import { Evento } from "./event.interface";
+import { Evento, EventoEstado, EventoModalidad } from "./event.interface";
 
 /**
  * Slide del carousel del feed de la app móvil, gestionado desde el panel.
@@ -82,7 +82,34 @@ export interface ReorderBannerSlidesPayload {
  *  La validación real siempre la hace el backend. */
 export const MAX_ACTIVE_BANNER_SLIDES = 5;
 
-/** True si el slide apunta a un evento que fue ocultado. En ese caso el slide
- *  NO se está publicando en la app, aunque figure como activo. */
-export const tieneEventoNoDisponible = (slide: BannerSlide): boolean =>
-  slide.eventId !== null && (!slide.evento || slide.evento.visible === false);
+/** Estados en los que un evento se sigue publicando. Refleja ESTADOS_PUBLICABLES
+ *  del backend: si cambia allá, hay que cambiarlo acá. */
+const ESTADOS_PUBLICABLES: EventoEstado[] = [
+  EventoEstado.PREVENTA,
+  EventoEstado.VENTA,
+];
+
+/**
+ * Motivo por el que un slide activo NO se está publicando en la app, o null si
+ * sí se publica.
+ *
+ * El backend (findPublic → esEventoPublicable) descarta el slide cuando su
+ * evento deja de ser válido. Un evento puede volverse inválido DESPUÉS de haber
+ * sido enlazado, así que no basta con la validación del formulario.
+ */
+export const motivoEventoNoDisponible = (slide: BannerSlide): string | null => {
+  if (slide.eventId === null) return null;
+  if (!slide.evento) return "El evento ya no existe";
+
+  const { visible, modalidad, estado } = slide.evento;
+
+  if (visible === false) return "El evento está oculto";
+  if (modalidad === EventoModalidad.FISICO)
+    return "El evento pasó a boletería física";
+  if (estado && !ESTADOS_PUBLICABLES.includes(estado))
+    return estado === EventoEstado.CANCELADO
+      ? "El evento fue cancelado"
+      : "El evento ya cerró";
+
+  return null;
+};
